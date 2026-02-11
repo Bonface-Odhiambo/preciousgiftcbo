@@ -117,7 +117,7 @@ export function Footer() {
                     </div>
                     <div>
                       <span className="text-sm text-background/50 block">Call us</span>
-                      <span className="font-medium">+254 700 000 000</span>
+                      <span className="font-medium">++254703244339</span>
                     </div>
                   </a>
                 </li>
