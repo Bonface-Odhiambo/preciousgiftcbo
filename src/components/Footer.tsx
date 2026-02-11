@@ -109,7 +109,7 @@ export function Footer() {
                 </li>
                 <li>
                   <a 
-                    href="tel:+254700000000" 
+                    href="tel:+254703244339" 
                     className="group flex items-start gap-4 text-background/70 hover:text-background transition-colors"
                   >
                     <div className="w-10 h-10 rounded-lg bg-background/10 group-hover:bg-primary group-hover:text-primary-foreground flex items-center justify-center shrink-0 transition-all duration-300">
