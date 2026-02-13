@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Heart, Package, GraduationCap, HandHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DonationModal } from "@/components/DonationModal";
 
 const supportOptions = [
   {
@@ -8,6 +10,8 @@ const supportOptions = [
     description: "Your contribution provides essential sanitary products that keep girls in school every day of the month.",
     action: "Donate Now",
     featured: true,
+    donationType: "sanitary_pads",
+    isDonation: true,
   },
   {
     icon: Heart,
@@ -15,6 +19,8 @@ const supportOptions = [
     description: "Fund our programs to purchase pads, educational materials, and reach more schools across Siaya.",
     action: "Give Today",
     featured: false,
+    donationType: "financial_support",
+    isDonation: true,
   },
   {
     icon: GraduationCap,
@@ -22,6 +28,8 @@ const supportOptions = [
     description: "Partner with us to bring sanitary pad supply and health education to an entire school.",
     action: "Partner With Us",
     featured: false,
+    donationType: "school_sponsorship",
+    isDonation: true,
   },
   {
     icon: HandHeart,
@@ -29,10 +37,23 @@ const supportOptions = [
     description: "Join our team as a health educator and help teach girls about menstrual hygiene.",
     action: "Join Us",
     featured: false,
+    isDonation: false,
   },
 ];
 
 export function SupportSection() {
+  const [donationModalOpen, setDonationModalOpen] = useState(false);
+  const [selectedDonationType, setSelectedDonationType] = useState("general");
+
+  const handleOptionClick = (option: typeof supportOptions[0]) => {
+    if (option.isDonation) {
+      setSelectedDonationType(option.donationType || "general");
+      setDonationModalOpen(true);
+    } else {
+      window.location.href = "/contact";
+    }
+  };
+
   return (
     <section id="support" className="section-padding bg-muted/30">
       <div className="container mx-auto px-4 md:px-6">
@@ -101,6 +122,7 @@ export function SupportSection() {
                 variant={option.featured ? "heroOutline" : "default"}
                 size="sm"
                 className="w-full"
+                onClick={() => handleOptionClick(option)}
               >
                 {option.action}
               </Button>
@@ -125,6 +147,12 @@ export function SupportSection() {
           </div>
         </div>
       </div>
+
+      <DonationModal
+        open={donationModalOpen}
+        onOpenChange={setDonationModalOpen}
+        defaultType={selectedDonationType}
+      />
     </section>
   );
 }

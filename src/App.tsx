@@ -12,6 +12,8 @@ import Support from "./pages/Support";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import DonationCallback from "./pages/DonationCallback";
+import DonationSuccess from "./pages/DonationSuccess";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/support" element={<Support />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/donation/callback" element={<DonationCallback />} />
+          <Route path="/donation/success" element={<DonationSuccess />} />
           <Route 
             path="/admin" 
             element={
