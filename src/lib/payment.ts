@@ -207,13 +207,13 @@ export class PaystackService {
   }
 }
 
-export class EPaymentService {
+export class EPaymentlyService {
   private apiKey: string;
   private merchantId: string;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_EPAYMENT_API_KEY || '';
-    this.merchantId = import.meta.env.VITE_EPAYMENT_MERCHANT_ID || '';
+    this.apiKey = import.meta.env.VITE_EPAYMENTLY_API_KEY || '';
+    this.merchantId = import.meta.env.VITE_EPAYMENTLY_MERCHANT_ID || '';
   }
 
   async initializePayment(donationData: DonationData): Promise<PaymentResponse> {
@@ -228,7 +228,7 @@ export class EPaymentService {
           donor_phone: donationData.donor_phone,
           amount: donationData.amount,
           currency: donationData.currency || 'KES',
-          payment_method: 'epayment',
+          payment_method: 'epaymently',
           payment_reference: reference,
           payment_status: 'pending',
           donation_type: donationData.donation_type,
@@ -275,14 +275,14 @@ export class EPaymentService {
         return { success: false, error: data.message || 'Payment initialization failed' };
       }
     } catch (error) {
-      console.error('ePayment initialization error:', error);
+      console.error('ePaymently initialization error:', error);
       return { success: false, error: 'Network error occurred' };
     }
   }
 
   async verifyPayment(reference: string): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      const response = await fetch(`${import.meta.env.VITE_EPAYMENT_API_URL}/api/v1/payments/verify/${reference}`, {
+      const response = await fetch(`${import.meta.env.VITE_EPAYMENTLY_API_URL}/api/v1/payments/verify/${reference}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -321,4 +321,4 @@ export class EPaymentService {
 }
 
 export const paystackService = new PaystackService();
-export const epaymentService = new EPaymentService();
+export const epaymentlyService = new EPaymentlyService();

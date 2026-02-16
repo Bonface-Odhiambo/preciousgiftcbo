@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Precious Gift CBO website now has a fully functional donation system integrated with **Paystack** and **ePayment** payment gateways. Donors can contribute via credit/debit cards, M-Pesa, and bank transfers.
+The Precious Gift CBO website now has a fully functional donation system integrated with **Paystack** and **ePaymently** payment gateways. Donors can contribute via credit/debit cards, M-Pesa, and bank transfers.
 
 ## Features Implemented
 
@@ -58,7 +58,7 @@ supabase db push
 - Go to Settings → API Keys & Webhooks
 - Add the callback URL to the whitelist
 
-#### For ePayment:
+#### For ePaymently:
 - Contact your provider to whitelist the callback URL
 
 ### Step 3: Configure Payment Gateway API Keys
@@ -144,7 +144,7 @@ src/
 - ✅ USSD
 - ✅ Mobile Money
 
-### ePayment
+### ePaymently
 - ✅ Credit/Debit Cards
 
 ## Security Features

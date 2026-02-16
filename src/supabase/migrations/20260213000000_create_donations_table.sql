@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.donations (
     donor_phone TEXT,
     amount DECIMAL(10, 2) NOT NULL,
     currency TEXT DEFAULT 'KES' NOT NULL,
-    payment_method TEXT NOT NULL, -- 'paystack' or 'epayment'
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('paystack', 'mpesa', 'bank_transfer', 'epaymently')),
     payment_reference TEXT UNIQUE NOT NULL,
     payment_status TEXT DEFAULT 'pending' NOT NULL, -- 'pending', 'success', 'failed'
     transaction_id TEXT,

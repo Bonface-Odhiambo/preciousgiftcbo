@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CreditCard, Loader2, Heart } from "lucide-react";
-import { paystackService, epaymentService, type DonationData } from "@/lib/payment";
+import { paystackService, epaymentlyService, type DonationData } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 
 interface DonationModalProps {
@@ -29,7 +29,7 @@ const DONATION_TYPES = [
 export function DonationModal({ open, onOpenChange, defaultType = "general", defaultAmount }: DonationModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "epayment">("paystack");
+  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "epaymently">("paystack");
   
   const [formData, setFormData] = useState({
     donor_name: "",
@@ -91,7 +91,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
       if (paymentMethod === "paystack") {
         result = await paystackService.openPaymentModal(donationData);
       } else {
-        result = await epaymentService.initializePayment(donationData);
+        result = await epaymentlyService.initializePayment(donationData);
         if (result.success && result.authorization_url) {
           window.location.href = result.authorization_url;
           return;
@@ -268,7 +268,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
             <Label>Payment Method</Label>
             <RadioGroup
               value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as "paystack" | "epayment")}
+              onValueChange={(value) => setPaymentMethod(value as "paystack" | "epaymently")}
             >
               <div className="flex items-center space-x-2 p-3 border rounded-lg">
                 <RadioGroupItem value="paystack" id="paystack" />
@@ -280,12 +280,9 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
                 </Label>
               </div>
               <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                <RadioGroupItem value="epayment" id="epayment" />
-                <Label htmlFor="epayment" className="font-normal cursor-pointer flex-1">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    <span>ePayment (Card Payment)</span>
-                  </div>
+                <RadioGroupItem value="epaymently" id="epaymently" />
+                <Label htmlFor="epaymently" className="cursor-pointer">
+                  ePaymently (Cards)
                 </Label>
               </div>
             </RadioGroup>
