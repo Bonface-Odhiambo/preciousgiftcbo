@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CreditCard, Loader2, Heart } from "lucide-react";
-import { paystackService, epaymentlyService, type DonationData } from "@/lib/payment";
+import { paystackService, type DonationData } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 
 interface DonationModalProps {
@@ -29,8 +29,8 @@ const DONATION_TYPES = [
 export function DonationModal({ open, onOpenChange, defaultType = "general", defaultAmount }: DonationModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "epaymently">("paystack");
-  
+  const [weeklyRecurring, setWeeklyRecurring] = useState(false);
+
   const [formData, setFormData] = useState({
     donor_name: "",
     donor_email: "",
@@ -54,7 +54,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.donor_name || !formData.donor_email || formData.amount <= 0) {
+    if (!formData.donor_name || !formData.donor_email || (!weeklyRecurring && formData.amount <= 0)) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and select an amount.",
@@ -79,23 +79,19 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         donor_name: formData.donor_name,
         donor_email: formData.donor_email,
         donor_phone: formData.donor_phone,
-        amount: formData.amount,
-        currency: "KES",
-        donation_type: formData.donation_type,
+        amount: weeklyRecurring ? 750 : formData.amount,
+        currency: weeklyRecurring ? "USD" : "KES",
+        donation_type: weeklyRecurring ? "weekly_recurring" : formData.donation_type,
         message: formData.message,
         is_anonymous: formData.is_anonymous,
       };
 
       let result;
 
-      if (paymentMethod === "paystack") {
-        result = await paystackService.openPaymentModal(donationData);
+      if (weeklyRecurring) {
+        result = await paystackService.openWeeklySubscriptionModal(donationData);
       } else {
-        result = await epaymentlyService.initializePayment(donationData);
-        if (result.success && result.authorization_url) {
-          window.location.href = result.authorization_url;
-          return;
-        }
+        result = await paystackService.openPaymentModal(donationData);
       }
 
       if (result.success) {
@@ -266,26 +262,35 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           {/* Payment Method */}
           <div className="space-y-2">
             <Label>Payment Method</Label>
-            <RadioGroup
-              value={paymentMethod}
-              onValueChange={(value) => setPaymentMethod(value as "paystack" | "epaymently")}
+            <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/30">
+              <CreditCard className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Paystack (Card, M-Pesa, Bank)</span>
+            </div>
+          </div>
+
+          {/* Weekly Recurring Option */}
+          <div className="space-y-2">
+            <div
+              className={`flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                weeklyRecurring ? "border-primary bg-primary/5" : "border-border"
+              }`}
+              onClick={() => setWeeklyRecurring(!weeklyRecurring)}
             >
-              <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                <RadioGroupItem value="paystack" id="paystack" />
-                <Label htmlFor="paystack" className="font-normal cursor-pointer flex-1">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    <span>Paystack (Card, M-Pesa, Bank)</span>
-                  </div>
+              <Checkbox
+                id="weekly_recurring"
+                checked={weeklyRecurring}
+                onCheckedChange={(checked) => setWeeklyRecurring(checked as boolean)}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <div className="space-y-1">
+                <Label htmlFor="weekly_recurring" className="cursor-pointer font-semibold">
+                  Weekly Recurring Donation — $750/week
                 </Label>
+                <p className="text-xs text-muted-foreground">
+                  Your saved card will be charged $750 every week automatically via Paystack.
+                </p>
               </div>
-              <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                <RadioGroupItem value="epaymently" id="epaymently" />
-                <Label htmlFor="epaymently" className="cursor-pointer">
-                  ePaymently (Cards)
-                </Label>
-              </div>
-            </RadioGroup>
+            </div>
           </div>
 
           {/* Submit Button */}
@@ -302,12 +307,17 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
             <Button
               type="submit"
               className="flex-1"
-              disabled={loading || formData.amount <= 0}
+              disabled={loading || (!weeklyRecurring && formData.amount <= 0)}
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Processing...
+                </>
+              ) : weeklyRecurring ? (
+                <>
+                  <Heart className="w-4 h-4 mr-2" />
+                  Subscribe — $750/week
                 </>
               ) : (
                 <>

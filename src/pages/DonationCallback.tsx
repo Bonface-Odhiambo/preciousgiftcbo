@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { paystackService, epaymentlyService } from "@/lib/payment";
+import { paystackService } from "@/lib/payment";
 
 export default function DonationCallback() {
   const [searchParams] = useSearchParams();
@@ -24,13 +24,7 @@ export default function DonationCallback() {
       }
 
       try {
-        let result;
-        
-        if (provider === "paystack") {
-          result = await paystackService.verifyPayment(reference);
-        } else if (provider === "epaymently") {
-          result = await epaymentlyService.verifyPayment(reference);
-        }
+        const result = await paystackService.verifyPayment(reference);
 
         if (result.success) {
           setStatus("success");

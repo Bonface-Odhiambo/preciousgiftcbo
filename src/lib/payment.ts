@@ -205,20 +205,17 @@ export class PaystackService {
       return { success: false, error: 'Failed to open payment modal' };
     }
   }
-}
 
-export class EPaymentlyService {
-  private apiKey: string;
-  private merchantId: string;
-
-  constructor() {
-    this.apiKey = import.meta.env.VITE_EPAYMENTLY_API_KEY || '';
-    this.merchantId = import.meta.env.VITE_EPAYMENTLY_MERCHANT_ID || '';
-  }
-
-  async initializePayment(donationData: DonationData): Promise<PaymentResponse> {
+  async openWeeklySubscriptionModal(donationData: DonationData): Promise<PaymentResponse> {
     try {
-      const reference = `PGC-EP-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      await this.loadPaystackScript();
+
+      const planCode = import.meta.env.VITE_PAYSTACK_WEEKLY_PLAN_CODE || '';
+      if (!planCode) {
+        return { success: false, error: 'Weekly donation plan not configured' };
+      }
+
+      const reference = `PGC-WK-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
       const { error: dbError } = await supabase
         .from('donations')
@@ -226,12 +223,12 @@ export class EPaymentlyService {
           donor_name: donationData.donor_name,
           donor_email: donationData.donor_email,
           donor_phone: donationData.donor_phone,
-          amount: donationData.amount,
-          currency: donationData.currency || 'KES',
-          payment_method: 'epaymently',
+          amount: 750,
+          currency: 'USD',
+          payment_method: 'paystack',
           payment_reference: reference,
           payment_status: 'pending',
-          donation_type: donationData.donation_type,
+          donation_type: donationData.donation_type || 'weekly_recurring',
           message: donationData.message,
           is_anonymous: donationData.is_anonymous || false,
         });
@@ -240,85 +237,39 @@ export class EPaymentlyService {
         return { success: false, error: 'Failed to create donation record' };
       }
 
-      const response = await fetch(`${import.meta.env.VITE_EPAYMENT_API_URL}/api/v1/payments/initialize`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          merchant_id: this.merchantId,
-          amount: donationData.amount,
-          currency: donationData.currency || 'KES',
-          reference: reference,
-          customer_email: donationData.donor_email,
-          customer_name: donationData.donor_name,
-          customer_phone: donationData.donor_phone,
-          callback_url: `https://www.preciousgiftcbo.com/donation/callback`,
-          return_url: `https://www.preciousgiftcbo.com/donation/success`,
+      return new Promise((resolve) => {
+        const handler = (window as any).PaystackPop.setup({
+          key: this.publicKey,
+          email: donationData.donor_email,
+          amount: 750 * 100,
+          currency: 'USD',
+          plan: planCode,
+          ref: reference,
           metadata: {
-            donation_type: donationData.donation_type,
-            message: donationData.message,
-          }
-        }),
+            donor_name: donationData.donor_name,
+            donation_type: 'weekly_recurring',
+            weekly_amount: 750,
+          },
+          onClose: () => {
+            resolve({ success: false, error: 'Payment cancelled' });
+          },
+          callback: async (response: any) => {
+            const verification = await this.verifyPayment(response.reference);
+            if (verification.success) {
+              resolve({ success: true, reference: response.reference });
+            } else {
+              resolve({ success: false, error: 'Payment verification failed' });
+            }
+          },
+        });
+
+        handler.openIframe();
       });
-
-      const data = await response.json();
-
-      if (data.success && data.payment_url) {
-        return {
-          success: true,
-          reference: reference,
-          authorization_url: data.payment_url,
-        };
-      } else {
-        return { success: false, error: data.message || 'Payment initialization failed' };
-      }
     } catch (error) {
-      console.error('ePaymently initialization error:', error);
-      return { success: false, error: 'Network error occurred' };
-    }
-  }
-
-  async verifyPayment(reference: string): Promise<{ success: boolean; data?: any; error?: string }> {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_EPAYMENTLY_API_URL}/api/v1/payments/verify/${reference}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.status === 'completed') {
-        await supabase
-          .from('donations')
-          .update({
-            payment_status: 'success',
-            transaction_id: data.transaction_id,
-            metadata: data,
-          })
-          .eq('payment_reference', reference);
-
-        return { success: true, data: data };
-      } else {
-        await supabase
-          .from('donations')
-          .update({
-            payment_status: 'failed',
-            metadata: data,
-          })
-          .eq('payment_reference', reference);
-
-        return { success: false, error: 'Payment verification failed' };
-      }
-    } catch (error) {
-      console.error('Payment verification error:', error);
-      return { success: false, error: 'Verification error occurred' };
+      console.error('Weekly subscription modal error:', error);
+      return { success: false, error: 'Failed to open payment modal' };
     }
   }
 }
 
 export const paystackService = new PaystackService();
-export const epaymentlyService = new EPaymentlyService();
