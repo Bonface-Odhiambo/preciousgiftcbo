@@ -224,8 +224,8 @@ export class PaystackService {
           donor_name: donationData.donor_name,
           donor_email: donationData.donor_email,
           donor_phone: donationData.donor_phone,
-          amount: 750,
-          currency: 'USD',
+          amount: donationData.amount,
+          currency: donationData.currency || 'KES',
           payment_method: 'paystack',
           payment_reference: reference,
           payment_status: 'pending',
@@ -242,8 +242,8 @@ export class PaystackService {
         const handler = (window as any).PaystackPop.setup({
           key: this.publicKey,
           email: donationData.donor_email,
-          amount: 750 * 100,
-          currency: 'USD',
+          amount: donationData.amount * 100,
+          currency: donationData.currency || 'KES',
           plan: planCode,
           ref: reference,
           metadata: {

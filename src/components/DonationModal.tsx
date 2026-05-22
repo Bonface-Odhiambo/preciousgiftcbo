@@ -53,7 +53,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.donor_name || !formData.donor_email) {
+    if (!formData.donor_name || !formData.donor_email || formData.amount <= 0) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and select an amount.",
@@ -78,8 +78,8 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         donor_name: formData.donor_name,
         donor_email: formData.donor_email,
         donor_phone: formData.donor_phone,
-        amount: 750,
-        currency: "USD",
+        amount: formData.amount,
+        currency: "KES",
         donation_type: formData.donation_type,
         message: formData.message,
         is_anonymous: formData.is_anonymous,
@@ -275,7 +275,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
             <Button
               type="submit"
               className="flex-1"
-              disabled={loading}
+              disabled={loading || formData.amount <= 0}
             >
               {loading ? (
                 <>
@@ -285,7 +285,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
               ) : (
                 <>
                   <Heart className="w-4 h-4 mr-2" />
-                  Donate Now
+                  {formData.amount > 0 ? `Donate KES ${formData.amount.toLocaleString()}` : "Donate Now"}
                 </>
               )}
             </Button>
