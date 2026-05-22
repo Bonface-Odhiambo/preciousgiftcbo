@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      donations: {
+        Row: {
+          id: string
+          donor_name: string
+          donor_email: string
+          donor_phone: string | null
+          amount: number
+          currency: string
+          payment_method: string
+          payment_reference: string
+          payment_status: string
+          transaction_id: string | null
+          donation_type: string | null
+          message: string | null
+          is_anonymous: boolean | null
+          metadata: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          donor_name: string
+          donor_email: string
+          donor_phone?: string | null
+          amount: number
+          currency?: string
+          payment_method: string
+          payment_reference: string
+          payment_status?: string
+          transaction_id?: string | null
+          donation_type?: string | null
+          message?: string | null
+          is_anonymous?: boolean | null
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          donor_name?: string
+          donor_email?: string
+          donor_phone?: string | null
+          amount?: number
+          currency?: string
+          payment_method?: string
+          payment_reference?: string
+          payment_status?: string
+          transaction_id?: string | null
+          donation_type?: string | null
+          message?: string | null
+          is_anonymous?: boolean | null
+          metadata?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       activities: {
         Row: {
           created_at: string | null

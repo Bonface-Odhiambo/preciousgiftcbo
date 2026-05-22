@@ -188,13 +188,14 @@ export class PaystackService {
           onClose: () => {
             resolve({ success: false, error: 'Payment cancelled' });
           },
-          callback: async (response: any) => {
-            const verification = await this.verifyPayment(response.reference);
-            if (verification.success) {
-              resolve({ success: true, reference: response.reference });
-            } else {
-              resolve({ success: false, error: 'Payment verification failed' });
-            }
+          callback: (response: any) => {
+            this.verifyPayment(response.reference).then((verification) => {
+              if (verification.success) {
+                resolve({ success: true, reference: response.reference });
+              } else {
+                resolve({ success: false, error: 'Payment verification failed' });
+              }
+            });
           },
         });
 
@@ -253,13 +254,14 @@ export class PaystackService {
           onClose: () => {
             resolve({ success: false, error: 'Payment cancelled' });
           },
-          callback: async (response: any) => {
-            const verification = await this.verifyPayment(response.reference);
-            if (verification.success) {
-              resolve({ success: true, reference: response.reference });
-            } else {
-              resolve({ success: false, error: 'Payment verification failed' });
-            }
+          callback: (response: any) => {
+            this.verifyPayment(response.reference).then((verification) => {
+              if (verification.success) {
+                resolve({ success: true, reference: response.reference });
+              } else {
+                resolve({ success: false, error: 'Payment verification failed' });
+              }
+            });
           },
         });
 
