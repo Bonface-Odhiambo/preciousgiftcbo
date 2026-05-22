@@ -244,12 +244,10 @@ export class PaystackService {
           email: donationData.donor_email,
           amount: donationData.amount * 100,
           currency: donationData.currency || 'KES',
-          plan: planCode,
           ref: reference,
           metadata: {
             donor_name: donationData.donor_name,
             donation_type: 'weekly_recurring',
-            weekly_amount: 750,
           },
           onClose: () => {
             resolve({ success: false, error: 'Payment cancelled' });
@@ -257,6 +255,10 @@ export class PaystackService {
           callback: (response: any) => {
             this.verifyPayment(response.reference).then((verification) => {
               if (verification.success) {
+                const authCode = verification.data?.authorization?.authorization_code;
+                if (authCode && planCode) {
+                  this.createSubscription(donationData.donor_email, planCode, authCode).catch(() => {});
+                }
                 resolve({ success: true, reference: response.reference });
               } else {
                 resolve({ success: false, error: 'Payment verification failed' });
@@ -270,6 +272,25 @@ export class PaystackService {
     } catch (error) {
       console.error('Weekly subscription modal error:', error);
       return { success: false, error: 'Failed to open payment modal' };
+    }
+  }
+
+  private async createSubscription(email: string, planCode: string, authorizationCode: string): Promise<void> {
+    try {
+      await fetch('https://api.paystack.co/subscription', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer: email,
+          plan: planCode,
+          authorization: authorizationCode,
+        }),
+      });
+    } catch {
+      // Silent — subscription creation failure does not affect donation UX
     }
   }
 }
