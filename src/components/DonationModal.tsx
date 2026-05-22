@@ -29,7 +29,6 @@ const DONATION_TYPES = [
 export function DonationModal({ open, onOpenChange, defaultType = "general", defaultAmount }: DonationModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [weeklyRecurring, setWeeklyRecurring] = useState(false);
 
   const [formData, setFormData] = useState({
     donor_name: "",
@@ -54,7 +53,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.donor_name || !formData.donor_email || (!weeklyRecurring && formData.amount <= 0)) {
+    if (!formData.donor_name || !formData.donor_email) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and select an amount.",
@@ -79,20 +78,14 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         donor_name: formData.donor_name,
         donor_email: formData.donor_email,
         donor_phone: formData.donor_phone,
-        amount: weeklyRecurring ? 750 : formData.amount,
-        currency: weeklyRecurring ? "USD" : "KES",
-        donation_type: weeklyRecurring ? "weekly_recurring" : formData.donation_type,
+        amount: 750,
+        currency: "USD",
+        donation_type: formData.donation_type,
         message: formData.message,
         is_anonymous: formData.is_anonymous,
       };
 
-      let result;
-
-      if (weeklyRecurring) {
-        result = await paystackService.openWeeklySubscriptionModal(donationData);
-      } else {
-        result = await paystackService.openPaymentModal(donationData);
-      }
+      const result = await paystackService.openWeeklySubscriptionModal(donationData);
 
       if (result.success) {
         toast({
@@ -268,31 +261,6 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
             </div>
           </div>
 
-          {/* Weekly Recurring Option */}
-          <div className="space-y-2">
-            <div
-              className={`flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                weeklyRecurring ? "border-primary bg-primary/5" : "border-border"
-              }`}
-              onClick={() => setWeeklyRecurring(!weeklyRecurring)}
-            >
-              <Checkbox
-                id="weekly_recurring"
-                checked={weeklyRecurring}
-                onCheckedChange={(checked) => setWeeklyRecurring(checked as boolean)}
-                onClick={(e) => e.stopPropagation()}
-              />
-              <div className="space-y-1">
-                <Label htmlFor="weekly_recurring" className="cursor-pointer font-semibold">
-                  Weekly Recurring Donation — $750/week
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Your saved card will be charged $750 every week automatically via Paystack.
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Submit Button */}
           <div className="flex gap-3">
             <Button
@@ -307,22 +275,17 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
             <Button
               type="submit"
               className="flex-1"
-              disabled={loading || (!weeklyRecurring && formData.amount <= 0)}
+              disabled={loading}
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Processing...
                 </>
-              ) : weeklyRecurring ? (
-                <>
-                  <Heart className="w-4 h-4 mr-2" />
-                  Subscribe — $750/week
-                </>
               ) : (
                 <>
                   <Heart className="w-4 h-4 mr-2" />
-                  Donate KES {formData.amount.toLocaleString()}
+                  Donate Now
                 </>
               )}
             </Button>
