@@ -72,6 +72,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
     }
 
     setLoading(true);
+    onOpenChange(false);
 
     try {
       const donationData: DonationData = {
@@ -92,7 +93,6 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           title: "Thank You!",
           description: "Your donation has been processed successfully.",
         });
-        onOpenChange(false);
         setFormData({
           donor_name: "",
           donor_email: "",
@@ -103,7 +103,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           message: "",
           is_anonymous: false,
         });
-      } else {
+      } else if (result.error && result.error !== "Payment cancelled") {
         toast({
           title: "Payment Failed",
           description: result.error || "Unable to process payment. Please try again.",
@@ -124,9 +124,9 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full sm:max-w-2xl max-h-[85dvh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
+          <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl">
             <Heart className="w-6 h-6 text-primary" />
             Make a Donation
           </DialogTitle>
@@ -135,7 +135,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Donation Type */}
           <div className="space-y-2">
             <Label>Donation Type</Label>
@@ -157,7 +157,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           {/* Amount Selection */}
           <div className="space-y-3">
             <Label>Donation Amount (KES)</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {PRESET_AMOUNTS.map((amount) => (
                 <Button
                   key={amount}
@@ -234,7 +234,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Leave a message of support..."
-                rows={3}
+                rows={2}
               />
             </div>
 
