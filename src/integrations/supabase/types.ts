@@ -29,6 +29,7 @@ export type Database = {
           donation_type: string | null
           message: string | null
           is_anonymous: boolean | null
+          card_last4: string | null
           metadata: Json | null
           created_at: string
           updated_at: string
@@ -47,6 +48,7 @@ export type Database = {
           donation_type?: string | null
           message?: string | null
           is_anonymous?: boolean | null
+          card_last4?: string | null
           metadata?: Json | null
           created_at?: string
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           donation_type?: string | null
           message?: string | null
           is_anonymous?: boolean | null
+          card_last4?: string | null
           metadata?: Json | null
           created_at?: string
           updated_at?: string

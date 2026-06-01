@@ -105,11 +105,13 @@ export class PaystackService {
       const data = await response.json();
 
       if (data.status && data.data.status === 'success') {
+        const cardLast4 = data.data.authorization?.last4 || null;
         await supabase
           .from('donations')
           .update({
             payment_status: 'success',
             transaction_id: data.data.id,
+            card_last4: cardLast4,
             metadata: data.data,
           })
           .eq('payment_reference', reference);

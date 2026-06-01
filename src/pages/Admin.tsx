@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, FileText, Settings, LogOut, CreditCard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AdminActivities } from "@/components/admin/AdminActivities";
 import { AdminSettings } from "@/components/admin/AdminSettings";
+import { AdminDonations } from "@/components/admin/AdminDonations";
 
-type AdminView = "dashboard" | "activities" | "settings";
+type AdminView = "dashboard" | "activities" | "donations" | "settings";
 
 export default function AdminPage() {
   const [currentView, setCurrentView] = useState<AdminView>("activities");
@@ -76,6 +77,14 @@ export default function AdminPage() {
               Activities
             </Button>
             <Button
+              variant={currentView === "donations" ? "secondary" : "ghost"}
+              className={`w-full justify-start ${currentView === "donations" ? "bg-primary/10 text-primary" : ""}`}
+              onClick={() => setCurrentView("donations")}
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Donations
+            </Button>
+            <Button
               variant={currentView === "settings" ? "secondary" : "ghost"}
               className={`w-full justify-start ${currentView === "settings" ? "bg-primary/10 text-primary" : ""}`}
               onClick={() => setCurrentView("settings")}
@@ -107,7 +116,7 @@ export default function AdminPage() {
                     Welcome to your admin panel.
                   </p>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Button
                     variant="outline"
                     className="h-auto p-6 flex flex-col items-start gap-2"
@@ -118,6 +127,19 @@ export default function AdminPage() {
                       <p className="font-semibold">Manage Activities</p>
                       <p className="text-sm text-muted-foreground">
                         Add, edit, or remove activities
+                      </p>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto p-6 flex flex-col items-start gap-2"
+                    onClick={() => setCurrentView("donations")}
+                  >
+                    <CreditCard className="w-8 h-8 text-accent" />
+                    <div className="text-left">
+                      <p className="font-semibold">View Donations</p>
+                      <p className="text-sm text-muted-foreground">
+                        Track donations and card info
                       </p>
                     </div>
                   </Button>
@@ -139,6 +161,7 @@ export default function AdminPage() {
             )}
 
             {currentView === "activities" && <AdminActivities />}
+            {currentView === "donations" && <AdminDonations />}
             {currentView === "settings" && <AdminSettings />}
           </main>
         </div>
