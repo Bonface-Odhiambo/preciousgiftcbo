@@ -213,7 +213,7 @@ export class PaystackService {
     try {
       await this.loadPaystackScript();
 
-      const planCode = import.meta.env.VITE_PAYSTACK_WEEKLY_PLAN_CODE || '';
+      const planCode = import.meta.env.Sanitary_Pads_Donation || '';
       if (!planCode) {
         return { success: false, error: 'Weekly donation plan not configured' };
       }
