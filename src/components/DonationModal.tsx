@@ -86,7 +86,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         is_anonymous: formData.is_anonymous,
       };
 
-      const result = await paystackService.openWeeklySubscriptionModal(donationData);
+      const result = await paystackService.openDailySubscriptionModal(donationData);
 
       if (result.success) {
         toast({
