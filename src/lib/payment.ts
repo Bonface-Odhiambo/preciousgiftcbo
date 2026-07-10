@@ -295,6 +295,35 @@ export class PaystackService {
       // Silent — subscription creation failure does not affect donation UX
     }
   }
+
+  async updatePlanAmount(
+    planCode: string,
+    newAmount: number,
+    updateExistingSubscriptions: boolean = true
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const { data, error } = await supabase.functions.invoke('update-plan', {
+        body: {
+          planCode,
+          newAmount,
+          updateExistingSubscriptions,
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data?.success) {
+        return { success: true, data: data.data };
+      } else {
+        return { success: false, error: data?.error || 'Failed to update plan' };
+      }
+    } catch (error) {
+      console.error('Plan update error:', error);
+      return { success: false, error: 'Network error occurred' };
+    }
+  }
 }
 
 export const paystackService = new PaystackService();
