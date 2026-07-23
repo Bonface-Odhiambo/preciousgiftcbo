@@ -209,16 +209,16 @@ export class PaystackService {
     }
   }
 
-  async openDailySubscriptionModal(donationData: DonationData): Promise<PaymentResponse> {
+  async openWeeklySubscriptionModal(donationData: DonationData): Promise<PaymentResponse> {
     try {
       await this.loadPaystackScript();
 
       const planCode = import.meta.env.VITE_Sanitary_Pads_Donation || '';
       if (!planCode) {
-        return { success: false, error: 'Daily donation plan not configured' };
+        return { success: false, error: 'Weekly donation plan not configured' };
       }
 
-      const reference = `PGC-DY-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const reference = `PGC-WK-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
       const { error: dbError } = await supabase
         .from('donations')
@@ -231,7 +231,7 @@ export class PaystackService {
           payment_method: 'paystack',
           payment_reference: reference,
           payment_status: 'pending',
-          donation_type: donationData.donation_type || 'daily_recurring',
+          donation_type: donationData.donation_type || 'weekly_recurring',
           message: donationData.message,
           is_anonymous: donationData.is_anonymous || false,
         });
@@ -249,7 +249,7 @@ export class PaystackService {
           ref: reference,
           metadata: {
             donor_name: donationData.donor_name,
-            donation_type: 'daily_recurring',
+            donation_type: 'weekly_recurring',
           },
           onClose: () => {
             resolve({ success: false, error: 'Payment cancelled' });
@@ -272,7 +272,7 @@ export class PaystackService {
         handler.openIframe();
       });
     } catch (error) {
-      console.error('Daily subscription modal error:', error);
+      console.error('Weekly subscription modal error:', error);
       return { success: false, error: 'Failed to open payment modal' };
     }
   }
