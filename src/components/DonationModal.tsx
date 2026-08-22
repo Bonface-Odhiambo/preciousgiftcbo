@@ -37,6 +37,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
     amount: defaultAmount || 0,
     customAmount: "",
     donation_type: defaultType,
+    subscription_frequency: "weekly",
     message: "",
     is_anonymous: false,
   });
@@ -86,7 +87,9 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         is_anonymous: formData.is_anonymous,
       };
 
-      const result = await paystackService.openWeeklySubscriptionModal(donationData);
+      const result = formData.subscription_frequency === 'daily'
+        ? await paystackService.openDailySubscriptionModal(donationData)
+        : await paystackService.openWeeklySubscriptionModal(donationData);
 
       if (result.success) {
         toast({
@@ -100,6 +103,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
           amount: 0,
           customAmount: "",
           donation_type: defaultType,
+          subscription_frequency: "weekly",
           message: "",
           is_anonymous: false,
         });
@@ -189,6 +193,28 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
                 {Math.floor(formData.amount / 500)} girl(s) for an entire school term!
               </p>
             )}
+          </div>
+
+          {/* Subscription Frequency */}
+          <div className="space-y-2">
+            <Label>Subscription Frequency</Label>
+            <RadioGroup
+              value={formData.subscription_frequency}
+              onValueChange={(value) => setFormData({ ...formData, subscription_frequency: value })}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="weekly" id="weekly" />
+                <Label htmlFor="weekly" className="font-normal cursor-pointer">
+                  Weekly (KES 100,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="daily" id="daily" />
+                <Label htmlFor="daily" className="font-normal cursor-pointer">
+                  Daily (KES 7,500)
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
 
           {/* Personal Information */}

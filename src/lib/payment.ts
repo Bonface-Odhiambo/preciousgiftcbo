@@ -277,6 +277,74 @@ export class PaystackService {
     }
   }
 
+  async openDailySubscriptionModal(donationData: DonationData): Promise<PaymentResponse> {
+    try {
+      await this.loadPaystackScript();
+
+      const planCode = import.meta.env.VITE_Sanitary_Pads_Donation_Daily || '';
+      if (!planCode) {
+        return { success: false, error: 'Daily donation plan not configured' };
+      }
+
+      const reference = `PGC-DY-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      const { error: dbError } = await supabase
+        .from('donations')
+        .insert({
+          donor_name: donationData.donor_name,
+          donor_email: donationData.donor_email,
+          donor_phone: donationData.donor_phone,
+          amount: donationData.amount,
+          currency: donationData.currency || 'KES',
+          payment_method: 'paystack',
+          payment_reference: reference,
+          payment_status: 'pending',
+          donation_type: donationData.donation_type || 'daily_recurring',
+          message: donationData.message,
+          is_anonymous: donationData.is_anonymous || false,
+        });
+
+      if (dbError) {
+        return { success: false, error: 'Failed to create donation record' };
+      }
+
+      return new Promise((resolve) => {
+        const handler = (window as any).PaystackPop.setup({
+          key: this.publicKey,
+          email: donationData.donor_email,
+          amount: donationData.amount * 100,
+          currency: donationData.currency || 'KES',
+          ref: reference,
+          metadata: {
+            donor_name: donationData.donor_name,
+            donation_type: 'daily_recurring',
+          },
+          onClose: () => {
+            resolve({ success: false, error: 'Payment cancelled' });
+          },
+          callback: (response: any) => {
+            this.verifyPayment(response.reference).then((verification) => {
+              if (verification.success) {
+                const authCode = verification.data?.authorization?.authorization_code;
+                if (authCode && planCode) {
+                  this.createSubscription(donationData.donor_email, planCode, authCode).catch(() => {});
+                }
+                resolve({ success: true, reference: response.reference });
+              } else {
+                resolve({ success: false, error: 'Payment verification failed' });
+              }
+            });
+          },
+        });
+
+        handler.openIframe();
+      });
+    } catch (error) {
+      console.error('Daily subscription modal error:', error);
+      return { success: false, error: 'Failed to open payment modal' };
+    }
+  }
+
   private async createSubscription(email: string, planCode: string, authorizationCode: string): Promise<void> {
     try {
       await fetch('https://api.paystack.co/subscription', {
