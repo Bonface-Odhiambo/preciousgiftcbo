@@ -86,10 +86,7 @@ export function DonationModal({ open, onOpenChange, defaultType = "general", def
         is_anonymous: formData.is_anonymous,
       };
 
-      // Automatically determine subscription plan based on amount
-      const result = formData.amount === 7500
-        ? await paystackService.openDailySubscriptionModal(donationData)
-        : await paystackService.openWeeklySubscriptionModal(donationData);
+      const result = await paystackService.openPaymentModal(donationData);
 
       if (result.success) {
         toast({
