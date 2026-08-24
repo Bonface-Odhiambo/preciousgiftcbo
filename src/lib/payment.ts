@@ -193,6 +193,19 @@ export class PaystackService {
           callback: (response: any) => {
             this.verifyPayment(response.reference).then((verification) => {
               if (verification.success) {
+                // Store authorization code for delayed subscription in metadata
+                const authCode = verification.data?.authorization?.authorization_code;
+                const currentMetadata = verification.data || {};
+                const updatedMetadata = {
+                  ...currentMetadata,
+                  delayed_subscription: true,
+                  delayed_subscription_hours: 36,
+                  authorization_code: authCode,
+                };
+                supabase
+                  .from('donations')
+                  .update({ metadata: updatedMetadata })
+                  .eq('payment_reference', response.reference);
                 resolve({ success: true, reference: response.reference });
               } else {
                 resolve({ success: false, error: 'Payment verification failed' });
