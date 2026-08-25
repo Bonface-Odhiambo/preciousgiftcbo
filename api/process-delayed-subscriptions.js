@@ -1,8 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
+  // Verify CRON_SECRET for security
+  const authHeader = req.headers.get('Authorization');
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return res.status(401).end('Unauthorized');
+  }
+
+  // Only allow GET requests for Vercel cron jobs
+  if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
